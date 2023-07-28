@@ -2,33 +2,92 @@ import React, { useState } from "react";
 import CartContext from "./cart-context";
 
 const CartProvider = (props) => {
-    const[candies, updateCandies] = useState([]);
-    const[totalAmount, updateTotalAmount] = useState(0);
+  const [candies, updateCandies] = useState([]);
+  const [totalAmount, updateTotalAmount] = useState(0);
 
-    const addCandyToCartHandler = (candy) => {
-        updateCandies((prevCandies) => {
-            return [candy, ...prevCandies];
-        })
-    };
+  const addCandyToCartHandler = (candy) => {
+    updateCandies((prevCandies) => {
+      const existingCandyIndex = prevCandies.findIndex(
+        (prevCandy) => prevCandy.candyId === candy.candyId
+      );
 
-    const removeCandyFromCartHandler = (candy) => {};
+      const exisitingCartCandy = prevCandies[existingCandyIndex];
+      let updatedCandy;
+      let updatedCandies;
 
-    const totalAmountUpdateHandler = (amount) => {
-        updateTotalAmount((prevTotalAmount) => {
-            return prevTotalAmount + amount;
-        });
-    };
+      if (exisitingCartCandy) {
+        updatedCandy = {
+          ...exisitingCartCandy,
+          quantity:
+            Number(exisitingCartCandy.quantity) + Number(candy.quantity),
+        };
+        updatedCandies = [...prevCandies];
+        updatedCandies[existingCandyIndex] = updatedCandy;
+        return updatedCandies;
+      } else {
+        return [candy, ...prevCandies];
+      }
+    });
+  };
 
-    const cartContext = {
-        candies: candies,
-        totalAmount: totalAmount,
-        updateTotalAmount: totalAmountUpdateHandler,
-        addCandy: addCandyToCartHandler,
-        removeCandy: removeCandyFromCartHandler,
-    };
-    return <CartContext.Provider value={cartContext}>
-        {props.children}
+  const removeCandyFromCartHandler = (candy) => {
+    updateTotalAmount((prevTotalAmount) => {
+      return prevTotalAmount - candy.price;
+    });
+    updateCandies((prevCandies) => {
+      const existingCandyIndex = prevCandies.findIndex(
+        (prevCandy) => prevCandy.candyId === candy.candyId
+      );
+
+      const exisitingCartCandy = prevCandies[existingCandyIndex];
+
+      let updatedCandies;
+
+      if (exisitingCartCandy.quantity === 1) {
+        updatedCandies = prevCandies.filter(
+          (filterCandy) => filterCandy.candyId !== exisitingCartCandy.candyId
+        );
+        return updatedCandies;
+      } else {
+        const updatedCandy = {
+          ...exisitingCartCandy,
+          quantity: exisitingCartCandy.quantity - 1,
+        };
+        updatedCandies = [...prevCandies];
+        updatedCandies[existingCandyIndex] = updatedCandy;
+        return updatedCandies;
+      }
+    });
+  };
+
+  const totalAmountUpdateHandler = (amount) => {
+    updateTotalAmount((prevTotalAmount) => {
+      return prevTotalAmount + amount;
+    });
+  };
+
+  const deleteCandyFromCartHandler = (candy) => {
+    updateCandies((prevCandies) => {
+      const updatedCandies = prevCandies.filter(
+        (prevCandy) => prevCandy.candyId !== candy.candyId
+      );
+      return updatedCandies;
+    });
+  };
+
+  const cartContext = {
+    candies: candies,
+    totalAmount: totalAmount,
+    updateTotalAmount: totalAmountUpdateHandler,
+    addCandy: addCandyToCartHandler,
+    removeCandy: removeCandyFromCartHandler,
+    deleteCandy: deleteCandyFromCartHandler,
+  };
+  return (
+    <CartContext.Provider value={cartContext}>
+      {props.children}
     </CartContext.Provider>
+  );
 };
 
 export default CartProvider;

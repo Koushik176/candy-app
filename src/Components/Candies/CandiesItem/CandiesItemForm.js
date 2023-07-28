@@ -1,9 +1,11 @@
 import React, { useContext } from "react";
 import Button from "../../UI/Button/Button";
 import CartContext from "../../../store/cart-context";
+import QuantityContext from "../../../store/quantity-context";
 
 const CandiesItemForm = (props) => {
   const cartCtx = useContext(CartContext);
+  const quantityCtx = useContext(QuantityContext);
 
   const addCandyToCart1 = (event) => {
     event.preventDefault();
@@ -41,11 +43,25 @@ const CandiesItemForm = (props) => {
     cartCtx.updateTotalAmount(cartPrice);
   };
 
+  const deleteCandyFromCart = (event) => {
+    event.preventDefault();
+    localStorage.removeItem(props.candyId);
+    quantityCtx.deleteCandy({
+      ...props.candy,
+      candyId: props.candyId,
+    });
+    cartCtx.deleteCandy({
+      ...props.candy,
+      candyId: props.candyId,
+    });
+  };
+
   return (
     <div>
       <Button onClick={addCandyToCart1}>Buy1</Button>
       <Button onClick={addCandyToCart2}>Buy2</Button>
       <Button onClick={addCandyToCart3}>Buy3</Button>
+      <Button onClick={deleteCandyFromCart}>Delete</Button>
     </div>
   );
 };

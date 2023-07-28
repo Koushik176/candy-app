@@ -1,15 +1,24 @@
 import React, { useContext } from "react";
 import Modal from "../UI/Modal";
 import CartContext from "../../store/cart-context";
-import QuantityContext from "../../store/quantity-context";
+//import QuantityContext from "../../store/quantity-context";
 import CartItem from "./CartItem";
 import Button from "../UI/Button/Button";
 
 const Cart = (props) => {
   const cartCtx = useContext(CartContext);
-  const quantityCtx = useContext(QuantityContext);
+  //const quantityCtx = useContext(QuantityContext);
 
   const totalAmount = `Rs. ${cartCtx.totalAmount.toFixed(2)}`;
+
+  const cartItemRemoveHandler = (candy) => {
+    cartCtx.removeCandy(candy);
+  };
+
+  const cartItemAddHandler = (candy) => {
+    cartCtx.addCandy({ ...candy, quantity: 1 });
+    cartCtx.updateTotalAmount(Number(candy.price));
+  };
 
   const cartItems = (
     <ul>
@@ -19,6 +28,8 @@ const Cart = (props) => {
           name={candy.name}
           amount={candy.quantity}
           price={candy.price}
+          onRemove={cartItemRemoveHandler.bind(null, candy)}
+          onAdd={cartItemAddHandler.bind(null, candy)}
         />
       ))}
     </ul>
@@ -27,11 +38,11 @@ const Cart = (props) => {
     <Modal>
       {cartItems}
       <div>
-        <span>totalAmount</span>
-        <span>{totalAmount}</span>
+        <span>Total Amount</span>
+        <span> {totalAmount}</span>
       </div>
       <div>
-        <Button>Close</Button>
+        <Button onClick={props.onClose}>Close</Button>
         <Button>Order</Button>
       </div>
     </Modal>
